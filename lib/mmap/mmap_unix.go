@@ -9,12 +9,11 @@ package mmap
 import (
 	"syscall"
 	"unsafe"
-	"encoding/binary"
 )
 
 var _zero uintptr
 
-func mmap(fd, inProt, inFlags uintptr, offset int64, length int) (*MMap, error) {
+func mmap(fd, inProt, inFlags uintptr, offset int64, length int) (MMap, error) {
 	flags := syscall.MAP_SHARED
 	prot := syscall.PROT_READ
 	switch {
@@ -34,32 +33,32 @@ func mmap(fd, inProt, inFlags uintptr, offset int64, length int) (*MMap, error) 
 	if err != nil {
 		return nil, err
 	}
-	v := (*MMap)(unsafe.Pointer(&data))
-	return v, nil
+	return *(*MMap)(unsafe.Pointer(&data)), nil
 }
 
-func (m *MMap) flush() error {
+func (m MMap) flush() error {
 	var _p0 unsafe.Pointer
-	if len(m.Data) > 0 {
-		_p0 = unsafe.Pointer(&m.Data[0])
+	if len(m) > 0 {
+		_p0 = unsafe.Pointer(&m[0])
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}
-	_, _, e1 := syscall.Syscall(syscall.SYS_MSYNC, uintptr(_p0), uintptr(len(m.Data)), uintptr(syscall.MS_SYNC))
+
+	_, _, e1 := syscall.Syscall(syscall.SYS_MSYNC, uintptr(_p0), uintptr(len(m)), uintptr(syscall.MS_SYNC))
 	if e1 != 0 {
 		return e1
 	}
 	return nil
 }
 
-func (m *MMap) lock() error {
+func (m MMap) lock() error {
 	var _p0 unsafe.Pointer
-	if len(m.Data) > 0 {
-		_p0 = unsafe.Pointer(&m.Data[0])
+	if len(m) > 0 {
+		_p0 = unsafe.Pointer(&m)
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}
-	_, _, e1 := syscall.Syscall(syscall.SYS_MLOCK, uintptr(_p0), uintptr(len(m.Data)), 0)
+	_, _, e1 := syscall.Syscall(syscall.SYS_MLOCK, uintptr(_p0), uintptr(len(m)), 0)
 	if e1 != 0 {
 		return e1
 	}
@@ -68,25 +67,19 @@ func (m *MMap) lock() error {
 
 func (m MMap) unlock() error {
 	var _p0 unsafe.Pointer
-	if len(m.Data) > 0 {
-		_p0 = unsafe.Pointer(&m.Data[0])
+	if len(m) > 0 {
+		_p0 = unsafe.Pointer(&m)
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}
-	_, _, e1 := syscall.Syscall(syscall.SYS_MUNLOCK, uintptr(_p0), uintptr(len(m.Data)), 0)
+	_, _, e1 := syscall.Syscall(syscall.SYS_MUNLOCK, uintptr(_p0), uintptr(len(m)), 0)
 	if e1 != 0 {
 		return e1
 	}
 	return nil
 }
 
-func (m *MMap) unmap() error {
-	b := *(*[]byte)(unsafe.Pointer(&m.Data[0]))
+func (m MMap) unmap() error {
+	b := *(*[]byte)(unsafe.Pointer(&m))
 	return syscall.Munmap(b)
-}
-
-func Int64ToBytes(i uint64) []byte {
-	var buf = make([]byte, 8)
-	binary.LittleEndian.PutUint64(buf, i)
-	return buf
 }

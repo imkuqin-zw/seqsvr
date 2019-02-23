@@ -43,7 +43,7 @@ func TestUnmap(t *testing.T) {
 	}
 }
 
-func TestReadWrite(t *testing.T) {
+func TestMMap_AppendData(t *testing.T) {
 	f := openFile(os.O_RDWR)
 	defer f.Close()
 	mmap, err := Map(f, RDWR, 0)
@@ -52,10 +52,37 @@ func TestReadWrite(t *testing.T) {
 		return
 	}
 	defer mmap.Unmap()
-	mmap.Data[1] = 9
+	tarvelData(mmap)
+	mmap[10]++
+	tarvelData(mmap)
+	fmt.Println(mmap.Flush())
+}
+
+func tarvelData(m MMap) {
+	for i := 0; i < len(m)/8; i++ {
+		fmt.Printf("%d,", m[i])
+	}
+	fmt.Println()
+}
+
+func TestReadWrite(t *testing.T) {
+	f := openFile(os.O_RDWR)
+	defer f.Close()
+	mmap, err := Map(f, RDWR, 0)
+	if err != nil {
+		t.Errorf("error mapping: %s", err)
+		return
+	}
+	defer func() {
+		fmt.Println(mmap.Unmap())
+	}()
+	//mmap.Data[0] = 8
+	//copy(mmap.Data, []uint64{9, 80})
+	tarvelData(mmap)
+	mmap[0] = 9
 	//mmap.Data[1] = 7
 	//mmap.Data[2] = 7
-	//mmap.Data[3] = 7
+	//mm9p.Data[3] = 7
 	//mmap.Data[4] = 7
 	//mmap.Data[5] = 7
 	fmt.Println(mmap.Flush())
@@ -127,7 +154,8 @@ func TestNonZeroOffset(t *testing.T) {
 	if err != nil {
 		t.Errorf("error mapping file: %s", err)
 	}
-	m.Unmap()
+	fmt.Println(m)
+	//m.Unmap()
 	fileobj.Close()
 
 	// Map the second page by itself
@@ -139,7 +167,7 @@ func TestNonZeroOffset(t *testing.T) {
 	if err != nil {
 		t.Errorf("error mapping file: %s", err)
 	}
-	err = m.Unmap()
+	//err = m.Unmap()
 	if err != nil {
 		t.Error(err)
 	}

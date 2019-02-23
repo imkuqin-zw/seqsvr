@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package storesvr;
+
+message cmd {
+    int32 typ = 1;
+    req_get_max_seq get_seq = 2;
+    req_set_max_seq set_seq = 3;
+    req_set_metadata set_metadata = 4;
+    req_del_metadata del_metadata = 5;
+}
+
+message req_get_max_seq {
+    uint32 uid = 1;
+}
+
+message req_set_max_seq {
+    uint32 uid = 1;
+    uint64 max_seq = 2;
+}
+
+message req_set_metadata {
+    string raft_id = 1;
+    map<string, string> data = 2;
+}
+
+message req_del_metadata {
+    string raft_id = 1;
+}
+
+message req_node_join {
+    string addr = 1;
+    string node_id = 2;
+    map<string, string> metadata = 3;
+}
+
+message leader {
+    string addr = 1;
+    repeated string nodes = 2;
+}
+
+
+

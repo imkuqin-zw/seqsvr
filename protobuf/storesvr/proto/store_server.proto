@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package storesvr;
+
+import "base.proto";
+import "raft.proto";
+
+service StoreServer {
+    // 更新MaxSeq
+    rpc RpcUpdateMaxSeq(uid_max_seq) returns (no_content) {}
+    // 获取MaxSeq
+    rpc RpcGetSeqMax(uid) returns (max_seq) {}
+    // 加入节点
+    rpc RpcJoin(req_node_join) returns (no_content) {}
+    // 获取所有服务节点地址
+    rpc RpcGetAllSvrNode(no_content) returns (all_svr_node) {}
+}
+

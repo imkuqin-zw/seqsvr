@@ -27,13 +27,11 @@ const (
 )
 
 // MMap represents a file mapped into memory.
-type MMap struct {
-	Data []uint64
-}
+type MMap []uint64
 
 // Map maps an entire file into memory.
 // If ANON is set in flags, f is ignored.
-func Map(f *os.File, prot, flags int) (*MMap, error) {
+func Map(f *os.File, prot, flags int) (MMap, error) {
 	return MapRegion(f, -1, prot, flags, 0)
 }
 
@@ -41,7 +39,7 @@ func Map(f *os.File, prot, flags int) (*MMap, error) {
 // The offset parameter must be a multiple of the system's page size.
 // If length < 0, the entire file will be mapped.
 // If ANON is set in flags, f is ignored.
-func MapRegion(f *os.File, length int, prot, flags int, offset int64) (*MMap, error) {
+func MapRegion(f *os.File, length int, prot, flags int, offset int64) (MMap, error) {
 	if offset%int64(os.Getpagesize()) != 0 {
 		return nil, errors.New("offset parameter must be a multiple of the system's page size")
 	}
@@ -66,30 +64,30 @@ func MapRegion(f *os.File, length int, prot, flags int, offset int64) (*MMap, er
 	return mmap(fd, uintptr(prot), uintptr(flags), offset, length)
 }
 
-func (m *MMap) header() *reflect.SliceHeader {
-	return (*reflect.SliceHeader)(unsafe.Pointer(m))
+func (m MMap) header() *reflect.SliceHeader {
+	return (*reflect.SliceHeader)(unsafe.Pointer(&m))
 }
 
-func (m *MMap) addrLen() (uintptr, uintptr) {
+func (m MMap) addrLen() (uintptr, uintptr) {
 	header := m.header()
 	return header.Data, uintptr(header.Len)
 }
 
 // Lock keeps the mapped region in physical memory, ensuring that it will not be
 // swapped out.
-func (m *MMap) Lock() error {
+func (m MMap) MLock() error {
 	return m.lock()
 }
 
 // Unlock reverses the effect of Lock, allowing the mapped region to potentially
 // be swapped out.
 // If m is already unlocked, aan error will result.
-func (m *MMap) Unlock() error {
+func (m MMap) MUnlock() error {
 	return m.unlock()
 }
 
 // Flush synchronizes the mapping's contents to the file's contents on disk.
-func (m *MMap) Flush() error {
+func (m MMap) Flush() error {
 	return m.flush()
 }
 
@@ -99,8 +97,17 @@ func (m *MMap) Flush() error {
 // result in undefined behavior.
 // Unmap should only be called on the slice value that was originally returned from
 // a call to Map. Calling Unmap on a derived slice may cause errors.
-func (m *MMap) Unmap() error {
+func (m MMap) Unmap() error {
 	err := m.unmap()
 	m = nil
 	return err
+}
+
+func (m MMap) Copy(data []byte) {
+	b := *(*[]byte)(unsafe.Pointer(&m))
+	copy(b, data)
+}
+
+func (m MMap) GetBytes() []byte {
+	return *(*[]byte)(unsafe.Pointer(&m))
 }

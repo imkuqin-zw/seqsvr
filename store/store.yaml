@@ -1,0 +1,27 @@
+bootstrap: true
+
+store_config:
+  id_begin: 0
+  size: 200000
+  data_file_dir: "./data1"
+  raft:
+    raft_dir: "./data1"
+    tcp_addr: "127.0.0.1:20001"
+    raft_id: "1"
+    apply_timeout: 5s
+    open_timeout: 10s
+    snapshot_interval: 20s
+    snapshot_threshold: 2
+
+log:
+  level: "debug"
+  outputPaths: ["stdout"]
+  errorOutputPaths: ["stdout"]
+  encoding: "console"
+  development: true
+
+rpc_conf:
+  svr_addr: "127.0.0.1:30001"
+  join_addr:
+    - "127.0.0.1:30002"
+    - "127.0.0.1:30003"

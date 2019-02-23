@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package storesvr;
+
+message uid_max_seq {
+    uint32 uid = 1;
+    uint64 max_seq = 2;
+}
+
+message uid {
+    uint32 value = 1;
+}
+
+message max_seq {
+    uint64 value = 1;
+}
+
+message no_content {
+}
+
+message all_svr_node {
+    repeated string nodes = 1;
+}

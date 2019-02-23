@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package grpcerr;
+
+import "google/protobuf/any.proto";
+
+message Error {
+    uint32 code = 1;
+    string message = 2;
+    bool temporary = 3;
+    uint32 err_code = 4;
+    repeated google.protobuf.Any detail = 5;
+}
