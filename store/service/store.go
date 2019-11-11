@@ -1,24 +1,24 @@
 package service
 
 import (
-	"github.com/imkuqin-zw/seqsvr/common"
-	"sync"
-	"github.com/imkuqin-zw/seqsvr/store/config"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/raft"
 	"github.com/hashicorp/raft-boltdb"
-	"path/filepath"
-	"fmt"
-	"time"
+	"github.com/micro/protobuf/proto"
+	"go.uber.org/zap"
+	"io"
 	"net"
 	"os"
-	"log"
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"github.com/micro/protobuf/proto"
-	"errors"
-	"io"
-	"encoding/binary"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
-	"go.uber.org/zap"
+	"path/filepath"
+	"seqsvr/common"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/config"
+	"sync"
+	"time"
 )
 
 var (
@@ -45,7 +45,7 @@ const (
 )
 
 const (
-	_                    = iota
+	_ = iota
 	RAFT_CMD_SET_MAX_SEQ
 	RAFT_CMD_GET_MAX_SEQ
 	METADATA_SET
@@ -56,14 +56,14 @@ type Store struct {
 	set   *common.Set
 	setMu sync.RWMutex
 
-	raft              *raft.Raft
-	raftID            string
-	raftDir           string
-	raftTcpAddr       string
-	raftTn            *raft.NetworkTransport
-	raftLog           raft.LogStore         // Persistent log store.
-	raftStable        raft.StableStore      // Persistent k-v store.
-	boltStore         *raftboltdb.BoltStore // Physical store.
+	raft        *raft.Raft
+	raftID      string
+	raftDir     string
+	raftTcpAddr string
+	raftTn      *raft.NetworkTransport
+	raftLog     raft.LogStore         // Persistent log store.
+	raftStable  raft.StableStore      // Persistent k-v store.
+	boltStore   *raftboltdb.BoltStore // Physical store.
 
 	leaderNotifyCh    chan bool
 	ApplyTimeout      time.Duration
@@ -81,13 +81,13 @@ type Store struct {
 func NewStore(config *config.StoreConf) (*Store, error) {
 	var err error
 	s := &Store{
-		raftID:         config.Raft.RaftID,
-		raftDir:        config.Raft.RaftDir,
-		raftTcpAddr:    config.Raft.TcpAddr,
-		ApplyTimeout:   config.Raft.ApplyTimeout,
-		meta:           make(map[string]map[string]string),
-		leaderNotifyCh: make(chan bool, 1),
-		SnapshotInterval: config.Raft.SnapshotInterval,
+		raftID:            config.Raft.RaftID,
+		raftDir:           config.Raft.RaftDir,
+		raftTcpAddr:       config.Raft.TcpAddr,
+		ApplyTimeout:      config.Raft.ApplyTimeout,
+		meta:              make(map[string]map[string]string),
+		leaderNotifyCh:    make(chan bool, 1),
+		SnapshotInterval:  config.Raft.SnapshotInterval,
 		SnapshotThreshold: config.Raft.SnapshotThreshold,
 	}
 	s.set, err = common.NewSet(config.IdBegin, config.Size, config.DataFileDir)
@@ -107,9 +107,14 @@ func (s *Store) Open(bootstrap bool) error {
 	var err error
 	raftConf := raft.DefaultConfig()
 	raftConf.LocalID = raft.ServerID(s.raftID)
-	raftConf.Logger = log.New(os.Stderr, "[raft] ", log.LstdFlags)
+	hclog.New(&hclog.LoggerOptions{
+		Name:       "[raft] ",
+		Level:      hclog.Debug,
+		JSONFormat: true,
+	})
+	raftConf.Logger = hclog.Default()
 	//raftConf.NotifyCh = s.leaderNotifyCh
-	raftConf.ShutdownOnRemove= false
+	raftConf.ShutdownOnRemove = false
 	if raftConf.SnapshotInterval != 0 {
 		raftConf.SnapshotInterval = s.SnapshotInterval
 	}
@@ -204,8 +209,6 @@ func (s *Store) Close(wait bool) error {
 	s.raftStable = nil
 	return nil
 }
-
-
 
 func newRaftTransport(addr string) (*raft.NetworkTransport, error) {
 	address, err := net.ResolveTCPAddr("tcp", addr)

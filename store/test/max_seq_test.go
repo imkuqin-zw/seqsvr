@@ -1,15 +1,15 @@
 package test
 
 import (
-	"testing"
 	"context"
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
 	"fmt"
+	"seqsvr/protobuf/storesvr"
+	"testing"
 )
 
 func TestRpcUpdateMaxSeq(t *testing.T) {
 	ctx := context.Background()
-	req := &storesvr.UidMaxSeq{Uid:1, MaxSeq:4}
+	req := &storesvr.UidMaxSeq{Uid: 1, MaxSeq: 4}
 	_, err := Client.RpcUpdateMaxSeq(ctx, req)
 	if err != nil {
 		fmt.Println("RpcUpdateMaxSeq: ", err.Error())
@@ -19,7 +19,7 @@ func TestRpcUpdateMaxSeq(t *testing.T) {
 
 func TestRpcGetSeqMax(t *testing.T) {
 	ctx := context.Background()
-	req := &storesvr.Uid{Value:1}
+	req := &storesvr.Uid{Value: 1}
 	res, err := Client.RpcGetSeqMax(ctx, req)
 	if err != nil {
 		fmt.Println("RpcGetSeqMax: ", err.Error())

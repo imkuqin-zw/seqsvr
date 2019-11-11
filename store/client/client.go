@@ -1,18 +1,18 @@
 package client
 
 import (
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
-	"errors"
-	"sync"
-	"time"
 	"context"
-	"github.com/imkuqin-zw/seqsvr/lib/grpcerr"
-	"sync/atomic"
+	"errors"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"seqsvr/lib/grpcerr"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 var NotUsableClientErr = errors.New("not usable client")

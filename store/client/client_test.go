@@ -1,13 +1,13 @@
 package client
 
 import (
-	"testing"
-	"fmt"
 	"context"
-	"time"
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
+	"fmt"
 	"go.uber.org/zap"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"testing"
+	"time"
 )
 
 var loggerConfig = &zap.Config{
@@ -63,7 +63,6 @@ func TestCluster_RpcUpdateMaxSeq(t *testing.T) {
 	fmt.Println("SUCCESS")
 	return
 }
-
 
 func TestCluster_GetMaxSeq(t *testing.T) {
 	logger.InitLogger(loggerConfig)

@@ -1,9 +1,9 @@
 package test
 
 import (
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
 	"fmt"
-	"github.com/imkuqin-zw/seqsvr/store/config"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/config"
 )
 
 var Client storesvr.StoreServerClient

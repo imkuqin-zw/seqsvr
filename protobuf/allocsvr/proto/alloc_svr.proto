@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package allocsvr;
+
+message Uid {
+    uint32 uid = 1;
+}
+
+message SeqNum {
+    uint64 seq_num = 1;
+}
+
+service AllocServer {
+    rpc FetchNextSeqNum(Uid) returns (SeqNum) {}
+}

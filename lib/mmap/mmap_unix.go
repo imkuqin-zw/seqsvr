@@ -43,7 +43,6 @@ func (m MMap) flush() error {
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}
-
 	_, _, e1 := syscall.Syscall(syscall.SYS_MSYNC, uintptr(_p0), uintptr(len(m)), uintptr(syscall.MS_SYNC))
 	if e1 != 0 {
 		return e1
@@ -54,7 +53,7 @@ func (m MMap) flush() error {
 func (m MMap) lock() error {
 	var _p0 unsafe.Pointer
 	if len(m) > 0 {
-		_p0 = unsafe.Pointer(&m)
+		_p0 = unsafe.Pointer(&m[0])
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}
@@ -68,7 +67,7 @@ func (m MMap) lock() error {
 func (m MMap) unlock() error {
 	var _p0 unsafe.Pointer
 	if len(m) > 0 {
-		_p0 = unsafe.Pointer(&m)
+		_p0 = unsafe.Pointer(&m[0])
 	} else {
 		_p0 = unsafe.Pointer(&_zero)
 	}

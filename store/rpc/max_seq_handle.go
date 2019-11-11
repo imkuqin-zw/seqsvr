@@ -1,16 +1,16 @@
 package rpc
 
 import (
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"github.com/imkuqin-zw/seqsvr/store/service"
 	"context"
-	"github.com/imkuqin-zw/seqsvr/lib/grpcerr"
-	"google.golang.org/grpc/codes"
 	"fmt"
-	"github.com/imkuqin-zw/seqsvr/store/err_status"
-	"github.com/imkuqin-zw/seqsvr/store/consts"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"seqsvr/lib/grpcerr"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/consts"
+	"seqsvr/store/err_status"
+	"seqsvr/store/service"
 )
 
 type MaxSeqHandle struct {
@@ -45,7 +45,7 @@ func (s *MaxSeqHandle) RpcUpdateMaxSeq(ctx context.Context, seq *storesvr.UidMax
 		return nil, grpcerr.New(codes.PermissionDenied,
 			err_status.ErrStr[err_status.NotLeader],
 			err_status.NotLeader,
-			&storesvr.Leader{Addr:s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
+			&storesvr.Leader{Addr: s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
 	}
 	return &storesvr.NoContent{}, s.store.Set(*seq)
 }
@@ -60,7 +60,7 @@ func (s *MaxSeqHandle) RpcGetSeqMax(ctx context.Context, uid *storesvr.Uid) (*st
 		return nil, grpcerr.New(codes.PermissionDenied,
 			err_status.ErrStr[err_status.NotLeader],
 			err_status.NotLeader,
-			&storesvr.Leader{Addr:s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
+			&storesvr.Leader{Addr: s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
 	}
 	val, err := s.store.Get(uid.Value)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *MaxSeqHandle) RpcJoin(ctx context.Context, req *storesvr.ReqNodeJoin) (
 		return nil, grpcerr.New(codes.PermissionDenied,
 			err_status.ErrStr[err_status.NotLeader],
 			err_status.NotLeader,
-			&storesvr.Leader{Addr:s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
+			&storesvr.Leader{Addr: s.leaderAPIAddr(), Nodes: s.allNodeAddr()})
 	}
 	if err := s.store.Join(req.NodeId, req.Addr, req.Metadata); err != nil {
 		return nil, err
@@ -89,8 +89,8 @@ func (s *MaxSeqHandle) RpcGetAllSvrNode(ctx context.Context, req *storesvr.NoCon
 			err_status.NotLeader)
 	}
 	return &storesvr.AllSvrNode{
-			Nodes: s.store.GetAllNodeMetaByKey(consts.META_KEY_API_ADDR),
-		}, nil
+		Nodes: s.store.GetAllNodeMetaByKey(consts.META_KEY_API_ADDR),
+	}, nil
 
 }
 
@@ -103,6 +103,6 @@ func (s *MaxSeqHandle) leaderAPIAddr() string {
 	return s.store.GetMetadata(id, "api_addr")
 }
 
-func (s *MaxSeqHandle) allNodeAddr() []string{
+func (s *MaxSeqHandle) allNodeAddr() []string {
 	return s.store.GetAllNodeMetaByKey(consts.META_KEY_API_ADDR)
 }

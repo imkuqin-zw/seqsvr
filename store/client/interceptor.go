@@ -1,15 +1,15 @@
 package client
 
 import (
-	"github.com/imkuqin-zw/seqsvr/lib/grpcerr"
-	"github.com/imkuqin-zw/seqsvr/store/err_status"
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
+	"context"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	"context"
 	"google.golang.org/grpc"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
+	"seqsvr/lib/grpcerr"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/err_status"
 )
 
 func UnaryClientInterceptor(ctx context.Context, method string,

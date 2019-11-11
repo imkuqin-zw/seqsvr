@@ -3,9 +3,9 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/imkuqin-zw/seqsvr/lib/mmap"
 	"os"
 	"path/filepath"
+	"seqsvr/lib/mmap"
 )
 
 const PerSectionIdSize uint32 = 100000

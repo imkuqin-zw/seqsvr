@@ -1,6 +1,4 @@
-package store
-
-
+package main
 
 func loadFile() {
 

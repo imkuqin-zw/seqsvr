@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/imkuqin-zw/seqsvr/store/config"
 	"fmt"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
-	"github.com/imkuqin-zw/seqsvr/store/service"
 	"go.uber.org/zap"
-	"github.com/imkuqin-zw/seqsvr/store/rpc"
 	"os"
 	"os/signal"
-	"syscall"
-	"github.com/imkuqin-zw/seqsvr/store/consts"
 	"path/filepath"
-	"github.com/imkuqin-zw/seqsvr/common"
+	"seqsvr/common"
+	"seqsvr/lib/logger"
+	"seqsvr/store/config"
+	"seqsvr/store/consts"
+	"seqsvr/store/rpc"
+	"seqsvr/store/service"
+	"syscall"
 )
 
 func main() {
@@ -43,8 +43,7 @@ func main() {
 		consts.META_KEY_API_ADDR: conf.RpcConf.SvrAddr,
 	}
 
-
-	if !bootstrap{
+	if !bootstrap {
 		rpc.Join(conf.RpcConf, conf.StoreConf.Raft.TcpAddr, conf.StoreConf.Raft.RaftID, meta)
 	}
 

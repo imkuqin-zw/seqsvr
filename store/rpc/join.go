@@ -1,18 +1,18 @@
 package rpc
 
 import (
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"github.com/imkuqin-zw/seqsvr/store/config"
 	"context"
-	"time"
-	"google.golang.org/grpc"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
-	"go.uber.org/zap"
-	"google.golang.org/grpc/metadata"
-	"github.com/imkuqin-zw/seqsvr/lib/grpcerr"
-	"github.com/micro/protobuf/ptypes"
 	"errors"
-	"github.com/imkuqin-zw/seqsvr/store/err_status"
+	"github.com/micro/protobuf/ptypes"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"seqsvr/lib/grpcerr"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/config"
+	"seqsvr/store/err_status"
+	"time"
 )
 
 const numAttempts = 3
@@ -35,7 +35,7 @@ func Join(conf *config.RpcConf, raftAddr, nodeId string, meta map[string]string)
 
 }
 
-func join(ctx context.Context, addr, raftAddr, nodeId string, meta map[string]string) (error) {
+func join(ctx context.Context, addr, raftAddr, nodeId string, meta map[string]string) error {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		logger.Error("did not connect", zap.Error(err))
@@ -46,8 +46,9 @@ func join(ctx context.Context, addr, raftAddr, nodeId string, meta map[string]st
 	var md metadata.MD
 	_, err = client.RpcJoin(ctx, &storesvr.ReqNodeJoin{Addr: raftAddr, NodeId: nodeId, Metadata: meta}, grpc.Trailer(&md))
 	if err != nil {
-		grpcErr := grpcerr.UnmarshalError(md)
-		if grpcErr != nil {
+		err := grpcerr.UnmarshalError(err, md)
+		grpcErr, ok := err.(*grpcerr.Error)
+		if ok && grpcErr != nil {
 			if grpcErr.ErrCode == err_status.NotLeader {
 				if len(grpcErr.Detail) > 0 {
 					var leader storesvr.Leader

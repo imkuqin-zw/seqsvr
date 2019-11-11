@@ -1,14 +1,14 @@
 package grpcerr
 
 import (
-	"google.golang.org/grpc/codes"
-	"encoding/base64"
 	"context"
-	"google.golang.org/grpc/metadata"
+	"encoding/base64"
 	"github.com/golang/protobuf/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func (e *Error) Error() string {
@@ -49,7 +49,7 @@ func MarshalError(err error, ctx context.Context) error {
 func UnmarshalError(err error, md metadata.MD) error {
 	vals, ok := md["rpc-error"]
 	if !ok {
-		return nil
+		return err
 	}
 	buf, err := base64.StdEncoding.DecodeString(vals[0])
 	if err != nil {

@@ -1,15 +1,15 @@
 package rpc
 
 import (
-	"github.com/imkuqin-zw/seqsvr/protobuf/storesvr"
-	"github.com/imkuqin-zw/seqsvr/store/config"
-	"net"
-	"github.com/imkuqin-zw/seqsvr/lib/logger"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"github.com/imkuqin-zw/seqsvr/lib/grpcerr"
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"net"
+	"seqsvr/lib/grpcerr"
+	"seqsvr/lib/logger"
+	"seqsvr/protobuf/storesvr"
+	"seqsvr/store/config"
 )
 
 type Server struct {
