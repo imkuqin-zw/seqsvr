@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"seqsvr/lib/mmap"
+	"sync"
 )
 
 const PerSectionIdSize uint32 = 100000
@@ -17,14 +18,19 @@ type RangeID struct {
 	Size    uint32
 }
 
-type SetID RangeID
+type SectionID uint32
 
 type Section struct {
-	SectionId   uint32
-	MaxSeq      uint64
-	SectionName string
-	IdSize      uint32
+	RangeID
+
+	Mut    sync.RWMutex
+	MaxSeq uint64
+	SeqNum []uint64
 }
+
+type RouterMap map[string][]SectionID
+
+type SetID RangeID
 
 type Set struct {
 	setId       RangeID
@@ -84,7 +90,7 @@ func (s *Set) String() string {
 }
 
 func (s *Set) SetMaxSeq(id uint32, maxSeq uint64) error {
-	b, index := CalcSectionId(s.setId, id)
+	b, index := CalcIndex(s.setId, id)
 	if !b {
 		err := fmt.Errorf("setSectionsData - max_seq invalid: "+
 			"local seq = %d,req_seq = %d, in set: %s", id, maxSeq, s.String())
@@ -96,7 +102,7 @@ func (s *Set) SetMaxSeq(id uint32, maxSeq uint64) error {
 }
 
 func (s *Set) GetMaxSeq(id uint32) (uint64, error) {
-	b, index := CalcSectionId(s.setId, id)
+	b, index := CalcIndex(s.setId, id)
 	if !b {
 		err := fmt.Errorf("getSectionsData - max_seq invalid: "+
 			"local seq = %d in set: %s", id, s.String())
@@ -119,7 +125,7 @@ func (s *Set) Close() error {
 }
 
 //获取section在set里的位置
-func CalcSectionId(rangeId RangeID, id uint32) (bool, uint32) {
+func CalcIndex(rangeId RangeID, id uint32) (bool, uint32) {
 	if !CheckIDByRange(rangeId, id) {
 		return false, 0
 	}
@@ -129,4 +135,12 @@ func CalcSectionId(rangeId RangeID, id uint32) (bool, uint32) {
 // 检查id是否在当前set里
 func CheckIDByRange(rangeId RangeID, id uint32) bool {
 	return id >= rangeId.IdBegin && id < rangeId.IdBegin+rangeId.Size
+}
+
+func GetSectionIDByUid(uid uint32) SectionID {
+	id := uid / PerSectionIdSize
+	if uid%PerSectionIdSize != 0 {
+		id++
+	}
+	return SectionID(id)
 }

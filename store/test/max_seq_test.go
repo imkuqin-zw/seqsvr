@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"seqsvr/protobuf/storesvr"
+	"sync"
 	"testing"
+	"time"
 )
 
 func TestRpcUpdateMaxSeq(t *testing.T) {
@@ -26,4 +28,32 @@ func TestRpcGetSeqMax(t *testing.T) {
 	}
 	fmt.Println("max seq", res.Value)
 	return
+}
+
+func TestMuChan(t *testing.T) {
+	chanal := make(chan bool)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-chanal:
+			fmt.Println("1")
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		select {
+		case <-chanal:
+			fmt.Println("2")
+			return
+		}
+	}()
+
+	go func() {
+		time.Sleep(3 * time.Second)
+		close(chanal)
+	}()
+	wg.Wait()
 }

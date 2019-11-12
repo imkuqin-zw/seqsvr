@@ -4,10 +4,17 @@ package allocsvr;
 
 message Uid {
     uint32 uid = 1;
+    uint64 version = 2;
 }
 
+message SectionIdArr {
+    repeated uint32 val = 1;
+}
+
+//map[string][]SectionID
 message SeqNum {
     uint64 seq_num = 1;
+    map<string, SectionIdArr> router = 2;
 }
 
 service AllocServer {
